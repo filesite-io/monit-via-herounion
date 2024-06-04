@@ -1,0 +1,23 @@
+{
+    "name": "@filesite/monit-via-herounion",
+    "description": "Website monitor via HeroUnion: https://herounion.filesite.io.",
+    "version": "0.0.1",
+    "author": "filesite.io",
+    "repository": {
+        "type": "git",
+        "url": "https://git.filesite.io/filesite/monit-via-herounion.git"
+    },
+    "license": "MIT",
+    "type": "module",
+    "engines": {
+        "node": ">=16"
+    },
+    "dependencies": {
+        "node-cron": "^3.0.2",
+        "axios": "^1.3.3",
+        "md5": "^2.3.0"
+    },
+    "scripts": {
+        "start": "node server.mjs"
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "systemLogDir": "log/",
+
+    "herounion_server": "https://herounion.filesite.io",
+    "herounion_id": "herounion_demo",
+    "herounion_token": "hello#world!",
+
+    "request_timeout": 10,
+    "monitFrequence": 10,
+    "resultQueryFrequence": 1,
+    "monit_urls": [
+        "https://tajian.tv",
+        "https://filesite.io"
+    ]
+}
