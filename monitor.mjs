@@ -28,7 +28,7 @@ class Monitor {
         const _self = this;
 
         if ( !this.config || (typeof(forceReload) != 'undefined' && forceReload) ) {
-	        console.log("Load config from %s", this.configFile);
+            common.log("Load config from %s", this.configFile);
             let config = await common.getConfigFromJsonFile(this.configFile);
 
             //覆盖默认配置
@@ -76,14 +76,14 @@ class Monitor {
             let taskRes;
             let total = configs.monit_urls.length;
             for (let i=0; i<total; i++) {
-            	if (_self.tasks.find((item) => item.url == configs.monit_urls[i] && item.stats != 'done')) {continue;}
+                if (_self.tasks.find((item) => item.url == configs.monit_urls[i] && item.stats != 'done')) {continue;}
 
-                console.log("Checking url %s ...", configs.monit_urls[i]);
+                common.log("Checking url %s ...", configs.monit_urls[i]);
                 taskRes = await common.createHeroUnionTask(configs.monit_urls[i], '', configs);
                 if (taskRes && taskRes.code == 1) {
                     _self.tasks.push(taskRes.task);
                 }else {
-                    console.error("Monit task create failed", taskRes);
+                    common.error("Monit task create failed", taskRes);
                 }
             }
         }, {
@@ -95,33 +95,50 @@ class Monitor {
     }
 
     async queryTasks() {
-    	const _self = this;
+        const _self = this;
         let configs = await _self.getConfig();
 
-    	let task, taskRes;
+        let task, taskRes;
         for(let index = 0; index < _self.tasks.length; index ++) {
-        	task = _self.tasks[index];
-        	if (task.status == 'done') {continue;}
+            task = _self.tasks[index];
+            if (task.status == 'done') {continue;}
 
-            //console.log('Query task result of %s', task.id);
             taskRes = await common.queryHeroUnionTask(task.id, configs);
-        	if (taskRes && taskRes.code == 1) {
-                _self.tasks[index] = taskRes.task;
+            if (taskRes && taskRes.code == 1) {
+                _self.tasks[index] = taskRes.task;        //更新任务数据
 
-                common.log('Connect success, url: %s, task id: %s', task.url, task.id);
+                common.log('Task status: %s, url: %s, task id: %s', taskRes.task.status, task.url, task.id);
 
-                let currentTime = common.getLocalTimeString();
-                let logFile = path.resolve(_self.systemLogDir) + '/ok.log';
-                common.saveLog(logFile, `[${currentTime}] Url request success: ${task.url}, task id: ${task.id}\n`);
+                if (taskRes.task.status == 'done') {
+                    let currentTime = common.getLocalTimeString();
+                    let logFile = path.resolve(_self.systemLogDir) + '/ok.log';
+                    common.saveLog(logFile, `[${currentTime}] Url request success: ${task.url}, task id: ${task.id}\n`);
+
+                    //写入JSON格式的log
+                    logFile = path.resolve(_self.systemLogDir) + '/json_stats.log';
+                    let logData = {
+                        "timestamp": common.getTimestamp(),
+                        "url": task.url,
+                        "status": taskRes.task.status
+                    };
+                    common.saveLog(logFile, JSON.stringify(logData) + `\n`);
+                }else if (taskRes.task.status == 'failed') {
+                    //写入错误日志
+                    let currentTime = common.getLocalTimeString();
+                    let logFile = path.resolve(_self.systemLogDir) + '/fail.log';
+                    common.saveLog(logFile, `[${currentTime}] Url request failed: ${task.url}, task id: ${task.id}\n`);
+
+                    //写入JSON格式的log
+                    logFile = path.resolve(_self.systemLogDir) + '/json_stats.log';
+                    let logData = {
+                        "timestamp": common.getTimestamp(),
+                        "url": task.url,
+                        "status": task.status
+                    };
+                    common.saveLog(logFile, JSON.stringify(logData) + `\n`);
+                }
             }else {
-                console.error("Monit task query failed", taskRes);
-
-                //TODO: 写入日志，或发送告警
-                common.error('Connect warning, url: %s, task id: %s', task.url, task.id);
-
-                let currentTime = common.getLocalTimeString();
-                let logFile = path.resolve(_self.systemLogDir) + '/fail.log';
-                common.saveLog(logFile, `[${currentTime}] Url request failed: ${task.url}, task id: ${task.id}\n`);
+                common.error('Task query failed, url: %s, task id: %s', task.url, task.id, taskRes);
             }
         }
 
