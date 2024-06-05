@@ -101,7 +101,7 @@ class Monitor {
         let task, taskRes;
         for(let index = 0; index < _self.tasks.length; index ++) {
             task = _self.tasks[index];
-            if (task.status == 'done') {continue;}
+            if (task.status == 'done' || task.status == 'failed') {continue;}
 
             taskRes = await common.queryHeroUnionTask(task.id, configs);
             if (taskRes && taskRes.code == 1) {
@@ -142,8 +142,8 @@ class Monitor {
             }
         }
 
-        //更新tasks，去掉已完成的
-        _self.tasks = _self.tasks.filter((item) => item.status != 'done');
+        //更新tasks，去掉已完成的和失败的
+        _self.tasks = _self.tasks.filter((item) => item.status != 'done' && item.status != 'failed');
     }
 
     //自动查询监控任务结果
