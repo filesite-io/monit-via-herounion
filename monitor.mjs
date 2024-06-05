@@ -133,7 +133,7 @@ class Monitor {
                     let logData = {
                         "timestamp": common.getTimestamp(),
                         "url": task.url,
-                        "status": task.status
+                        "status": taskRes.task.status
                     };
                     common.saveLog(logFile, JSON.stringify(logData) + `\n`);
                 }
