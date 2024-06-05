@@ -4,6 +4,17 @@ Website monitor via HeroUnion.
 基于HeroUnion的网站监控程序。
 
 
+## Demo在线演示
+
+[👉Ta荐网站监控👈](https://monitor.filesite.io/d/ddntdyyhv943ke/e7bd91-e7ab99-e79b91-e68ea7?orgId=1)
+
+借助工具Grafana和loki把log/json_stats.log里的JSON格式日志以图形的方式展示出来。
+
+
+Grafana使用请参考其官方文档：
+[Grafana documentation](https://grafana.com/docs/grafana/latest/)
+
+
 ## 使用方法
 
 1. 下载源码：
