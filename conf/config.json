@@ -8,6 +8,7 @@
     "request_timeout": 10,
     "monitFrequence": 10,
     "resultQueryFrequence": 1,
+    "resultMaxQueryTime": 3,
     "monit_urls": [
         "https://tajian.tv",
         "https://filesite.io"

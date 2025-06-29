@@ -94,6 +94,7 @@ class Monitor {
         common.log('Cronjob of url monit started.');
     }
 
+    //add query_time for every task
     async queryTasks() {
         const _self = this;
         let configs = await _self.getConfig();
@@ -102,6 +103,8 @@ class Monitor {
         for(let index = 0; index < _self.tasks.length; index ++) {
             task = _self.tasks[index];
             if (task.status == 'done' || task.status == 'failed') {continue;}
+
+            task.query_time = typeof(task.query_time) != 'undefined' ? task.query_time + 1 : 1;
 
             taskRes = await common.queryHeroUnionTask(task.id, configs);
             if (taskRes && taskRes.code == 1) {
@@ -138,7 +141,12 @@ class Monitor {
                     common.saveLog(logFile, JSON.stringify(logData) + `\n`);
                 }
             }else {
-                common.error('Task query failed, url: %s, task id: %s', task.url, task.id, taskRes);
+                common.error('[%s] Task query failed, url: %s, task id: %s', task.query_time, task.url, task.id, taskRes);
+
+                //set task fail when it come to max query time
+                if (task.query_time >= configs.resultMaxQueryTime) {
+                    task.status = 'failed';
+                }
             }
         }
 
